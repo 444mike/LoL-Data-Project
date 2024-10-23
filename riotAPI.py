@@ -58,3 +58,76 @@ def getPUUID(username, tagline):
     api_url = api_url + username + '/' + tagline + '/?' + key
     data = request(api_url)
     return data["puuid"]
+
+def getListOfChallengerPlayers(server):
+    listOfChallengerPlayersPuuid = []
+    api_url = "https://" + server + ".api.riotgames.com/lol/league/v4/challengerleagues/by-queue/RANKED_SOLO_5x5?" + key
+    data = request(api_url)
+    players = data["entries"]
+    for player in players:
+        summonerID = player["summonerId"]
+        puuid = convertSummonerIDtoPUUID(server, summonerID)
+        listOfChallengerPlayersPuuid.append(puuid)
+        print(listOfChallengerPlayersPuuid)
+    return listOfChallengerPlayersPuuid
+
+def getListOfGrandmasterPlayers(server):
+    listOfGrandmasterPlayersPuuid = []
+    api_url = "https://" + server + ".api.riotgames.com/lol/league/v4/grandmasterleagues/by-queue/RANKED_SOLO_5x5?" + key
+    data = request(api_url)
+    players = data["entries"]
+    for player in players:
+        summonerID = player["summonerId"]
+        puuid = convertSummonerIDtoPUUID(server, summonerID)
+        listOfGrandmasterPlayersPuuid.append(puuid)
+    return listOfGrandmasterPlayersPuuid
+
+def getListOfMasterPlayers(server):
+    listOfMasterPlayersPuuid = []
+    api_url = "https://" + server + ".api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_SOLO_5x5?" + key
+    data = request(api_url)
+    players = data["entries"]
+    counter = 0
+    for player in players:
+        summonerID = player["summonerId"]
+        puuid = convertSummonerIDtoPUUID(server, summonerID)
+        listOfMasterPlayersPuuid.append(puuid)
+        counter += 1
+        print(counter)
+
+    return listOfMasterPlayersPuuid
+
+def getListOfMasterPlusPlayers(server):
+    a = getListOfChallengerPlayers(server)
+    b = getListOfGrandmasterPlayers(server)
+    c = getListOfMasterPlayers(server)
+    listOfMasterPlusPlayers = a + b + c
+    return listOfMasterPlusPlayers
+
+def getMatchIDs(region, puuid, numberOfGames):
+    api_url = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?queue=420&type=ranked&count=" + numberOfGames + "&" + key
+    data = request(api_url)
+    print(data)
+    return data
+
+def getMatchInfo(matchid, region):
+    api_url = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/" + matchid + "?" + key
+    data = request(api_url)
+    return data
+
+def getMatchTimelineInfo(matchid, region):
+    api_url = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/" + matchid + "/timeline" + "?" + key
+    data = request(api_url)
+    return data
+
+def getPatchOfMatch(matchid, region):
+    api_url = "https://" + region + ".api.riotgames.com/lol/match/v5/matches/" + matchid + "?" + key
+    data = request(api_url)
+    patch = data["info"]["gameVersion"]
+    return patch
+
+def convertSummonerIDtoPUUID(server, summonerID):
+    api_url = "https://" + server + ".api.riotgames.com/lol/summoner/v4/summoners/" + summonerID + "?" + key
+    data = request(api_url)
+    puuid = data["puuid"]
+    return puuid
