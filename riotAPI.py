@@ -131,3 +131,51 @@ def convertSummonerIDtoPUUID(server, summonerID):
     data = request(api_url)
     puuid = data["puuid"]
     return puuid
+
+def createFileOfChallengerPlayers(server):
+    challenger_puuids = getListOfChallengerPlayers("na1")
+    # Specify the file name where you want to save the data.
+    output_file = "challengerPlayers_na1.json"
+
+    # Write the list of PUUIDs to the JSON file.
+    with open(output_file, "w") as file:
+        json.dump(challenger_puuids, file, indent=4)
+
+    print(f"Challenger players saved to {output_file}")
+
+
+def createFileOfGrandmasterPlayers(server):
+    grandmaster_puuids = getListOfGrandmasterPlayers(server)
+    # Specify the file name where you want to save the data.
+    output_file = "grandmasterPuuids_na1.json"
+
+    # Write the list of PUUIDs to the JSON file.
+    with open(output_file, "w") as file:
+        json.dump(grandmaster_puuids, file, indent=4)
+
+    print(f"Grandmaster players saved to {output_file}")
+
+def createFileOfMasterPlayers(server):
+    master_puuids = getListOfMasterPlayers(server)
+    # Specify the file name where you want to save the data.
+    output_file = "masterPuuids_na1.json"
+
+    # Write the list of PUUIDs to the JSON file.
+    with open(output_file, "w") as file:
+        json.dump(master_puuids, file, indent=4)
+
+    print(f"Master players saved to {output_file}")
+
+def json_to_excel(json_file_path, excel_file_path):
+    # Convert JSON data to an Excel file
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+    
+    # Flatten and normalize the data as needed
+    info_data = data.get('info', {})
+    participants = info_data.get('participants', [])
+    participants_df = pd.json_normalize(participants)
+
+    # Save to Excel file
+    participants_df.to_excel(excel_file_path, index=False)
+    print(f"Match info saved to {excel_file_path}")
