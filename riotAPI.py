@@ -179,3 +179,102 @@ def json_to_excel(json_file_path, excel_file_path):
     # Save to Excel file
     participants_df.to_excel(excel_file_path, index=False)
     print(f"Match info saved to {excel_file_path}")
+
+
+
+challengerFile = "challengerPuuids_na1.json"
+# with a list of challengerPuuids, get the matches
+
+def getChallengerMatchIds(challengerFile, region, numberOfGames):
+    # open file
+    with open("challengerPuuids_na1.json", 'r') as file:
+        challengers = json.load(file)
+
+    # loop through and get past x amount of games for each player
+    listOfChallengerMatchIds = []
+    for challenger in challengers:
+        listOfChallengerMatchIds.extend(getMatchIDs(region, challenger, numberOfGames))
+
+    # write to json file
+    with open("challengerMatchIds.json", 'w') as outfile:
+        json.dump(listOfChallengerMatchIds, outfile, indent=4)
+    return listOfChallengerMatchIds
+
+
+def getMatchIds(rankPuuids, rankMatchIds, region, numberOfGames):
+    # open file
+    with open(rankPuuids, 'r') as file:
+        puuids = json.load(file)
+
+    # loop through and get past x amount of games for each player
+    listOfMatchIds = []
+    for puuid in puuids:
+        listOfMatchIds.extend(getMatchIDs(region, puuid, numberOfGames))
+
+    # write to json file
+    with open(rankMatchIds, 'w') as outfile:
+        json.dump(listOfMatchIds, outfile, indent=4)
+    return listOfMatchIds
+
+
+# given a match id and a server, convert the match_id json into an xlsx file
+def create_flattened_match_excel(match_id, server):
+    # Step 1: Retrieve the match info (replace with your actual function to get match data)
+    match_info = getMatchInfo(match_id, server)  # Use your data retrieval function here
+    
+    # Step 2: Extract and flatten metadata and info
+    metadata = match_info.get('metadata', {})
+    info = match_info.get('info', {})
+    
+    # Create a copy of info without 'participants' and 'teams' for the metadata sheet
+    info_for_metadata = info.copy()
+    info_for_metadata.pop('participants', None)
+    info_for_metadata.pop('teams', None)
+    
+    # Flatten metadata and the modified info data into a single dictionary
+    flattened_metadata_info = {**metadata, **info_for_metadata}
+    
+    # Convert the flattened match-level data into a DataFrame with one row
+    match_info_df = pd.DataFrame([flattened_metadata_info])
+    print("Match Info DataFrame shape:", match_info_df.shape)
+    
+    # Step 3: Extract and flatten the specific fields from participants
+    participants = info.get('participants', [])
+    participants_fields = [
+        'assists', 'champLevel', 'championId', 'championName', 'damageDealtToBuildings',
+        'deaths', 'goldEarned', 'individualPosition', 'item0', 'item1', 'item2', 'item3', 
+        'item4', 'item5', 'item6', 'kills', 'lane', 'participantId', 'puuid', 
+        'riotIdGameName', 'riotIdTagline', 'role', 'totalDamageDealtToChampions', 'win',
+        'perks.statPerks.defense', 'perks.statPerks.flex', 'perks.statPerks.offense', 'perks.styles'
+    ]
+    
+    # Flatten participants data using json_normalize
+    participants_flattened = pd.json_normalize(participants, sep='_')
+    existing_fields = [field for field in participants_fields if field in participants_flattened.columns]
+    participants_flattened = participants_flattened[existing_fields]
+    print("Participants DataFrame shape:", participants_flattened.shape)
+    
+    # Step 4: Extract and flatten the team bans
+    teams = info.get('teams', [])
+    teams_flattened = pd.json_normalize(
+        teams, 
+        record_path='bans', 
+        meta=['teamId'], 
+        sep='_'
+    )
+    print("Teams DataFrame shape:", teams_flattened.shape)
+    
+    # Step 5: Save everything to an Excel file with multiple sheets
+    excel_file_name = f"matchinfo_{match_id}.xlsx"
+    with pd.ExcelWriter(excel_file_name) as writer:
+        match_info_df.to_excel(writer, sheet_name='Match Info', index=False)
+        participants_flattened.to_excel(writer, sheet_name='Participants', index=False)
+        teams_flattened.to_excel(writer, sheet_name='Teams', index=False)
+    
+    print(f"Match info saved to {excel_file_name}")
+
+
+if __name__ == '__main__':
+    getMatchIds("grandmasterPuuids_na1.json", "grandmasterMatchIds_na1.json", "americas", "20")
+
+
