@@ -1,7 +1,10 @@
 import dash
 from dash import dcc, html
-import database_manager as dbm
 import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output
+import database_manager as dbm
+from plot_generator import plot_role_data  # Import the updated plot generation function
+import os
 
 # Initialize the Dash app with a Bootstrap theme
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SOLAR])
@@ -34,8 +37,6 @@ def fetch_data(role=None, min_games=0, search_query=""):
     # Get data from the database
     data = dbm.get_data(query)
     return data
-
-
 
 # Get initial data
 data = fetch_data()
@@ -76,6 +77,19 @@ app.layout = dbc.Container([
     ], className="mb-4"),
     dbc.Row([
         dbc.Col([
+            html.H3("Generate Plots by Role"),
+            dbc.ButtonGroup([
+                dbc.Button("Generate Top Plot", id='plot-btn-top', n_clicks=0, color="primary"),
+                dbc.Button("Generate Jungle Plot", id='plot-btn-jungle', n_clicks=0, color="success"),
+                dbc.Button("Generate Middle Plot", id='plot-btn-middle', n_clicks=0, color="info"),
+                dbc.Button("Generate Bottom Plot", id='plot-btn-bottom', n_clicks=0, color="warning"),
+                dbc.Button("Generate Support Plot", id='plot-btn-support', n_clicks=0, color="danger"),
+            ], className="d-flex justify-content-center mb-3"),
+            html.Div(id='plot-display', children=[], className="text-center")
+        ], width=12)
+    ], className="mb-4"),
+    dbc.Row([
+        dbc.Col([
             html.P("Displaying the win rates of each champion by their role (lane):"),
             dbc.ButtonGroup([
                 dbc.Button("Top", id='btn-top', n_clicks=0, color="primary"),
@@ -112,47 +126,64 @@ app.layout = dbc.Container([
             html.Div(id='win-rate-table', children=generate_table(data)),
             width=12
         )
-    ])
+    ]),
 ], fluid=True, style={'backgroundColor': '#333333', 'padding': '20px', 'fontFamily': 'Arial, sans-serif'})
 
-# Define callback to update table based on button clicked, input value, and search query
+# Define callback to update table and plot based on user interactions
 @app.callback(
-    dash.Output('win-rate-table', 'children'),
+    [Output('win-rate-table', 'children'),
+     Output('plot-display', 'children')],
     [
-        dash.Input('btn-top', 'n_clicks'),
-        dash.Input('btn-jungle', 'n_clicks'),
-        dash.Input('btn-middle', 'n_clicks'),
-        dash.Input('btn-bottom', 'n_clicks'),
-        dash.Input('btn-support', 'n_clicks'),
-        dash.Input('min-games-input', 'value'),
-        dash.Input('search-input', 'value')
+        Input('btn-top', 'n_clicks'),
+        Input('btn-jungle', 'n_clicks'),
+        Input('btn-middle', 'n_clicks'),
+        Input('btn-bottom', 'n_clicks'),
+        Input('btn-support', 'n_clicks'),
+        Input('plot-btn-top', 'n_clicks'),
+        Input('plot-btn-jungle', 'n_clicks'),
+        Input('plot-btn-middle', 'n_clicks'),
+        Input('plot-btn-bottom', 'n_clicks'),
+        Input('plot-btn-support', 'n_clicks'),
+        Input('min-games-input', 'value'),
+        Input('search-input', 'value')
     ]
 )
-def update_table(n_top, n_jungle, n_middle, n_bottom, n_support, min_games, search_query):
+def update_table_and_plot(n_top, n_jungle, n_middle, n_bottom, n_support,
+                          n_plot_top, n_plot_jungle, n_plot_middle, n_plot_bottom, n_plot_support,
+                          min_games, search_query):
     # Determine which button was clicked
     ctx = dash.callback_context
     if not ctx.triggered:
-        return generate_table(fetch_data(min_games=min_games, search_query=search_query or ""))
-    
+        return generate_table(fetch_data(min_games=min_games, search_query=search_query or "")), []
+
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
-    # Map the clicked button to the corresponding role
+
+    # Determine role for filtering or plotting
     role = None
-    if button_id == 'btn-top':
+    if button_id in ['btn-top', 'plot-btn-top']:
         role = 'TOP'
-    elif button_id == 'btn-jungle':
+    elif button_id in ['btn-jungle', 'plot-btn-jungle']:
         role = 'JUNGLE'
-    elif button_id == 'btn-middle':
+    elif button_id in ['btn-middle', 'plot-btn-middle']:
         role = 'MIDDLE'
-    elif button_id == 'btn-bottom':
+    elif button_id in ['btn-bottom', 'plot-btn-bottom']:
         role = 'BOTTOM'
-    elif button_id == 'btn-support':
+    elif button_id in ['btn-support', 'plot-btn-support']:
         role = 'SUPPORT'
 
-    # Fetch filtered data based on role, minimum games, and search query
-    filtered_data = fetch_data(role=role, min_games=min_games, search_query=search_query or "")
-    return generate_table(filtered_data)
+    # Fetch filtered data for table
+    filtered_data = fetch_data(role=role if 'btn' in button_id else None, min_games=min_games, search_query=search_query or "")
+
+    # Generate plot for the selected role
+    plot_output = []
+    if 'plot' in button_id and role:
+        # Pass the min_games filter to the plot function to generate the appropriate graph
+        plot_path = plot_role_data(role, min_games=min_games)
+        plot_output = html.Img(src=f"/assets/{os.path.basename(plot_path)}", 
+                               style={"width": "70%", "height": "auto", "margin": "0 auto", "display": "block"})
+
+    return generate_table(filtered_data), plot_output
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
