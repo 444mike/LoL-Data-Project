@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')  # Set the backend to a non-interactive one to avoid GUI issues
+matplotlib.use('Agg')  # Use a non-interactive backend
 
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
@@ -16,10 +16,9 @@ def fetch_plot_data(role, min_games=0):
         FROM participants
         WHERE individualPosition = '{role}'
         GROUP BY championName
-        HAVING total_games >= {min_games}
+        HAVING COUNT(*) >= {min_games}
         ORDER BY total_games DESC;
     """
-    
     # Get data from the database using the database manager
     data = dbm.get_data(query)
 

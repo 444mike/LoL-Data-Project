@@ -151,15 +151,14 @@ app.layout = dbc.Container([
 def update_table_and_plot(n_top, n_jungle, n_middle, n_bottom, n_support,
                           n_plot_top, n_plot_jungle, n_plot_middle, n_plot_bottom, n_plot_support,
                           min_games, search_query):
-    # Determine which button was clicked
     ctx = dash.callback_context
     if not ctx.triggered:
         return generate_table(fetch_data(min_games=min_games, search_query=search_query or "")), []
 
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    # Determine role for filtering or plotting
     role = None
+
+    # Map buttons to roles
     if button_id in ['btn-top', 'plot-btn-top']:
         role = 'TOP'
     elif button_id in ['btn-jungle', 'plot-btn-jungle']:
@@ -171,18 +170,16 @@ def update_table_and_plot(n_top, n_jungle, n_middle, n_bottom, n_support,
     elif button_id in ['btn-support', 'plot-btn-support']:
         role = 'SUPPORT'
 
-    # Fetch filtered data for table
     filtered_data = fetch_data(role=role if 'btn' in button_id else None, min_games=min_games, search_query=search_query or "")
 
-    # Generate plot for the selected role
     plot_output = []
     if 'plot' in button_id and role:
-        # Pass the min_games filter to the plot function to generate the appropriate graph
-        plot_path = plot_role_data(role, min_games=min_games)
-        plot_output = html.Img(src=f"/assets/{os.path.basename(plot_path)}", 
+        plot_path = plot_role_data(role, min_games=min_games)  # Ensure min_games is passed
+        plot_output = html.Img(src=f"/assets/{os.path.basename(plot_path)}",
                                style={"width": "70%", "height": "auto", "margin": "0 auto", "display": "block"})
 
     return generate_table(filtered_data), plot_output
+
 
 # Run the app
 if __name__ == '__main__':
