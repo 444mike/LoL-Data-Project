@@ -6,7 +6,7 @@ import pandas as pd
 # servers = lil shitters
 # regions = 4 regions (americas, asia, europe, sea)
 
-api_key = "RGAPI-c74fe57b-d8ae-418d-b28d-3e7aa4ff2d16"
+api_key = "RGAPI-748451c6-475a-4bb0-87af-cfebe6ca6cb8"
 key = f"api_key={api_key}"
 
 servers = {"br": "br1",
