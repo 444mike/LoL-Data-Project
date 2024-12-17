@@ -9,13 +9,15 @@ app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SOLAR
 nav_bar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
-        dbc.NavItem(dbc.NavLink("Game Duration", href="/gameduration")),  # New link
+        dbc.NavItem(dbc.NavLink("Game Duration", href="/gameduration")),
+        dbc.NavItem(dbc.NavLink("Champion Performance", href="/statistics")),  # New link
     ],
     brand="League of Legends Dashboard",
     brand_href="/",
     color="primary",
     dark=True
 )
+
 
 # Define the layout
 app.layout = dbc.Container([
