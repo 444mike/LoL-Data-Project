@@ -10,7 +10,7 @@ import os
 # Function to fetch data for plotting win rate vs pick rate for a specific role
 def fetch_plot_data(role, min_games=0):
     query = f"""
-        SELECT championName, 
+        SELECT championName,
                COUNT(*) as total_games,
                100.0 * SUM(CASE WHEN win = 1 THEN 1 ELSE 0 END) / COUNT(*) AS win_rate
         FROM participants
@@ -28,11 +28,26 @@ def fetch_plot_data(role, min_games=0):
 
     return data
 
-# Function to create a plot for a specific role and save it to the assets folder
 def plot_role_data(role, min_games=0):
     # Fetch data for the specified role
     data = fetch_plot_data(role, min_games)
-    
+
+    # Get the directory of the current file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define the full path to the assets directory
+    assets_dir = os.path.join(current_dir, "assets")
+
+    # Ensure the assets directory exists
+    if not os.path.exists(assets_dir):
+        os.makedirs(assets_dir)
+
+    # Define the full path for the champion images directory
+    champion_images_dir = os.path.join(assets_dir, "champion_images")
+
+    # Define the full path for the plot file
+    plot_path = os.path.join(assets_dir, f"{role.lower()}_plot.png")
+
     # Create a scatter plot with champion images as data points
     fig, ax = plt.subplots(figsize=(10, 8))
     ax.set_title(f"{role} Role: Pick Rate vs Win Rate (Minimum {min_games} Games)")
@@ -49,8 +64,8 @@ def plot_role_data(role, min_games=0):
         win_rate = row['win_rate']
         pick_rate = row['pick_rate']
 
-        # Load the champion image
-        image_path = f"assets/champion_images/{champion_name}.png"
+        # Construct the full path to the champion image
+        image_path = os.path.join(champion_images_dir, f"{champion_name}.png")
         if os.path.exists(image_path):
             img = Image.open(image_path)
 
@@ -59,9 +74,8 @@ def plot_role_data(role, min_games=0):
             ab = AnnotationBbox(im, (win_rate, pick_rate), frameon=False, pad=0.1)
             ax.add_artist(ab)
 
-    # Save the plot to the assets folder
-    plot_path = f"assets/{role.lower()}_plot.png"
+    # Save the plot to the assets directory
     plt.savefig(plot_path, format="png", bbox_inches='tight', dpi=300)
     plt.close(fig)
-    
+
     return plot_path

@@ -11,8 +11,8 @@ dash.register_page(__name__, path="/", name="Home")
 
 def fetch_data(role=None, min_games=0):
     query = f"""
-        SELECT championName, 
-               TRIM(individualPosition) AS individualPosition, 
+        SELECT championName,
+               TRIM(individualPosition) AS individualPosition,
                COUNT(*) as total_games,
                100.0 * SUM(CASE WHEN win = 1 THEN 1 ELSE 0 END) / COUNT(*) AS win_rate
         FROM participants
@@ -39,9 +39,9 @@ def fetch_data(role=None, min_games=0):
 def generate_table(data):
     return html.Table(
         style={
-            "width": "100%", 
-            "borderCollapse": "collapse", 
-            "color": "#ddd", 
+            "width": "100%",
+            "borderCollapse": "collapse",
+            "color": "#ddd",
             "margin": "20px auto"
         },
         children=[
@@ -58,7 +58,7 @@ def generate_table(data):
                 html.Tr([
                     html.Td(row['championName'], style={"padding": "10px", "textAlign": "center"}),
                     html.Td(html.Img(src=f"assets/champion_images/{row['championName']}.png",
-                                     style={"width": "50px", "height": "50px"}), 
+                                     style={"width": "50px", "height": "50px"}),
                             style={"padding": "10px", "textAlign": "center"}),
                     html.Td("Support" if row['individualPosition'] == "UTILITY" else row['individualPosition'],
                             style={"padding": "10px", "textAlign": "center"}),  # Display 'Support'
@@ -77,7 +77,7 @@ def generate_table(data):
 data = fetch_data()
 layout = dbc.Container([
     html.H1("League of Legends Dashboard", className="text-center mb-4"),
-    
+
     # Plot generation section (stays at the top)
     html.Div([
         html.H3("Pick Rate vs Win Rate Analysis", className="text-center"),
@@ -193,8 +193,11 @@ def update_content(n_top, n_jungle, n_middle, n_bottom, n_support,
     if generate_plot and role:
         plot_path = pg.plot_role_data(role, min_games or 0)
         if os.path.exists(plot_path):
-            plot = html.Img(src=plot_path, style={"width": "80%", "margin-top": "20px"})
+            # Convert the file system path to a web-accessible path
+            plot_url = f"/assets/{os.path.basename(plot_path)}"
+            plot = html.Img(src=plot_url, style={"width": "80%", "margin-top": "20px"})
 
     return table, plot
+
 
 

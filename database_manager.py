@@ -205,11 +205,12 @@ def insert_match_data(match_info, db_name='lol_matches.db'):
     conn.close()
     print(f'Match data for match ID {match_id} inserted into {db_name}.')
 
-def get_data(query, db_path='lol_matches.db'):
+def get_data(query, db_path='/home/4444mike/mysite/lol_matches.db'):
     conn = sqlite3.connect(db_path)
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
+
 
 
 # Example usage:

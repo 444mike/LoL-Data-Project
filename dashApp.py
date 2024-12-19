@@ -18,7 +18,6 @@ nav_bar = dbc.NavbarSimple(
     dark=True
 )
 
-
 # Define the layout
 app.layout = dbc.Container([
     dcc.Location(id="url"),  # Tracks the current page URL
@@ -26,6 +25,4 @@ app.layout = dbc.Container([
     dash.page_container      # Container to load pages dynamically
 ], fluid=True)
 
-# Run the server
-if __name__ == "__main__":
-    app.run_server(debug=False)
+# Note: Do not include app.run_server() here
