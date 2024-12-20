@@ -26,9 +26,7 @@ def fetch_data(role=None, min_games=0):
     query += f" HAVING total_games >= {min_games}"  # Minimum games filter
     query += " ORDER BY win_rate DESC;"
 
-    print("DEBUG: Executing query ->", query)  # Debug query
     data = dbm.get_data(query)
-    print("DEBUG: Query returned rows ->", len(data))  # Debug rows count
     return data
 
 
