@@ -135,7 +135,7 @@ def update_champion_table(min_games, role, metric, search_query):
             html.Td(row["avg_deaths"]),
             html.Td(row["avg_assists"]),
             html.Td(row["avg_building_damage"]),
-            html.Td(row["total_games"])  # Total Games as last column
+            html.Td(row["total_games"])
         ]) for _, row in data.iterrows()
     ]
 
@@ -150,7 +150,7 @@ def update_champion_table(min_games, role, metric, search_query):
                 html.Th("Deaths/Game"),
                 html.Th("Assists/Game"),
                 html.Th("Building Damage"),
-                html.Th("Total Games")  # Adjusted order
+                html.Th("Total Games")
             ])),
             html.Tbody(table_rows)
         ],
