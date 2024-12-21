@@ -1,4 +1,4 @@
-from riotAPI import getListOfChallengerPlayers, getListOfGrandmasterPlayers, getMatchIDs, getMatchInfo
+from api.riotAPI import getListOfChallengerPlayers, getListOfGrandmasterPlayers, getMatchIDs, getMatchInfo
 from database_manager import insert_match_data
 import json
 

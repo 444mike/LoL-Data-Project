@@ -2,7 +2,7 @@ import os
 import requests
 
 # Define the URL for the image
-image_url = "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ambessa_0.jpg"
+image_url = "https://ddragon.leagueoflegends.com/cdn/14.23.1/img/champion/Ambessa.png"
 
 # Define the local path to save the image
 images_folder = "champion_images"

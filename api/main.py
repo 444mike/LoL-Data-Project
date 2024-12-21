@@ -1,5 +1,5 @@
 # Import everything from RiotAPI and database_manager
-from riotAPI import *
+from api.riotAPI import *
 from database_manager import *
 import os
 
